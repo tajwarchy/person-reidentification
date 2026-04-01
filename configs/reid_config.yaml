@@ -1,0 +1,84 @@
+# ─────────────────────────────────────────
+# Project V2.1 — Person Re-Identification
+# ─────────────────────────────────────────
+
+project:
+  name: "project-v2.1-person-reid"
+  seed: 42
+
+# ── Paths ──────────────────────────────
+paths:
+  market1501_root: "data/Market-1501-v15.09.15"
+  duke_root:       "data/DukeMTMC-reID"
+  checkpoint:      "checkpoints/reid_best.pth"
+  gallery_index:   "outputs/embeddings/gallery.index"
+  gallery_meta:    "outputs/embeddings/gallery_meta.pkl"
+  output_videos:   "outputs/videos"
+  output_plots:    "outputs/plots"
+  output_embeddings: "outputs/embeddings"
+
+# ── Model ──────────────────────────────
+model:
+  backbone: "resnet50_ibn_a"
+  pretrained: true
+  feat_dim: 2048
+
+# ── Training (Colab) ───────────────────
+train:
+  dataset: "Market1501"
+  num_workers: 2          # Colab — not macOS
+  batch_size: 64
+  num_epochs: 60
+  warmup_epochs: 10
+  base_lr: 0.00035
+  weight_decay: 0.0005
+  loss:
+    id_loss: "cross_entropy_label_smooth"
+    metric_loss: "circle_loss"
+    circle_scale: 128
+    circle_margin: 0.25
+
+# ── Augmentation (Colab) ───────────────
+augmentation:
+  random_horizontal_flip: true
+  random_erasing_prob: 0.5
+  color_jitter: true
+  normalize_mean: [0.485, 0.456, 0.406]
+  normalize_std:  [0.229, 0.224, 0.225]
+
+# ── Inference (M1) ─────────────────────
+inference:
+  device: "mps"
+  num_workers: 0          # macOS constraint
+  batch_size: 32
+  input_size: [256, 128]  # H x W — standard ReID input
+
+# ── Gallery ────────────────────────────
+gallery:
+  faiss_metric: "cosine"  # vectors will be L2-normalized
+
+# ── Retrieval Demo ─────────────────────
+retrieval:
+  top_k: 10
+  num_query_examples: 5
+
+# ── t-SNE ──────────────────────────────
+tsne:
+  num_ids: 30
+  images_per_id: 10
+  perplexity: 30
+  n_iter: 1000
+  random_state: 42
+
+# ── Video Demo ─────────────────────────
+video:
+  input_path: "data/demo_video.mp4"
+  output_annotated: "outputs/videos/reid_demo_annotated.mp4"
+  output_sidebyside: "outputs/videos/reid_demo_sidebyside.mp4"
+  yolo_model: "yolov8m.pt"
+  yolo_conf_threshold: 0.5
+  yolo_iou_threshold: 0.45
+  reid_similarity_threshold: 0.75
+  unknown_label: "Unknown"
+  top_reidentified_persons: 5
+  fps_output: 25
