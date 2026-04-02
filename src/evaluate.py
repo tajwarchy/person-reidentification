@@ -211,7 +211,15 @@ def main(args):
     model = ReIDModel(num_classes=num_classes).to(device)
     ckpt  = torch.load(cfg["paths"]["checkpoint"],
                        map_location=device, weights_only=False)
-    model.load_state_dict(ckpt["state_dict"])
+    # With this:
+    if args.dataset == "duke":
+        # Cross-dataset: classifier head has different size, skip it
+        state = {k: v for k, v in ckpt["state_dict"].items()
+                if not k.startswith("classifier")}
+        missing, unexpected = model.load_state_dict(state, strict=False)
+        print(f"  Skipped keys : {[k for k in missing if 'classifier' in k]}")
+    else:
+        model.load_state_dict(ckpt["state_dict"])
     model.eval()
     print(f"✅ Checkpoint loaded (epoch {ckpt['epoch']}, "
           f"mAP {ckpt['mAP']*100:.2f}%)")
