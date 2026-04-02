@@ -72,13 +72,15 @@ tsne:
 
 # ── Video Demo ─────────────────────────
 video:
-  input_path: "data/demo_video.mp4"
+  input_path: "data/demo_video.avi"
   output_annotated: "outputs/videos/reid_demo_annotated.mp4"
   output_sidebyside: "outputs/videos/reid_demo_sidebyside.mp4"
   yolo_model: "yolov8m.pt"
   yolo_conf_threshold: 0.5
   yolo_iou_threshold: 0.45
-  reid_similarity_threshold: 0.75
+  reid_similarity_threshold: 0.20
+  processing_width: 360        # resize frames for processing
+  fps_output: 30
   unknown_label: "Unknown"
   top_reidentified_persons: 5
   fps_output: 25
